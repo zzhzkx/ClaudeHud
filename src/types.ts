@@ -173,7 +173,7 @@ export const DEFAULT_CONFIG: HudConfig = {
   display: {
     showModel: true,
     showContextBar: true,
-    contextValue: 'percent',
+    contextValue: 'both',
     showTools: true,
     showAgents: false,
     showTodos: false,
