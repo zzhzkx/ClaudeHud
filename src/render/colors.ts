@@ -94,30 +94,27 @@ export function critical(text: string, colors?: Record<string, string>): string 
 // ---- 上下文进度条颜色 ----
 
 /**
- * 根据百分比返回平滑渐变的 256 色颜色索引
- * 在绿色 → 黄色 → 橙色 → 红色之间平滑过渡
+ * 根据百分比返回平滑渐变的真彩色 (24-bit RGB)
  *
- * 256 色中 16-231 号是可编程的 RGB 色，我们利用 22-33 号
- * (绿色到红色经过黄色) 做渐变映射。
+ * 渐变路径：绿 → 黄绿 → 金黄 → 橙 → 红
+ * 完全控制 RGB 值，不依赖 256 色盘的离散索引，确保绝对平滑。
  *
- * 如果用户配置了自定义颜色则优先使用，否则使用渐变。
+ * 渐变节点：
+ *   0%   rgb(0, 180, 0)   纯绿
+ *   25%  rgb(80, 200, 0)  黄绿
+ *   50%  rgb(200, 200, 0) 金黄
+ *   70%  rgb(255, 160, 0) 橙色
+ *   85%  rgb(255, 80, 0)  深橙
+ *   100% rgb(220, 0, 0)   纯红
  */
-function gradientColor256(percent: number): string {
-  // 256 色盘中选取的渐变节点 (颜色索引, 百分比)
-  // 22=深绿, 28=绿, 34=黄绿, 70=黄绿, 112=黄绿,
-  // 148=土黄, 184=黄, 220=金黄, 214=橙黄, 208=橙, 202=橙红, 196=红, 160=深红
-  const stops: { pct: number; idx: number }[] = [
-    { pct: 0,   idx: 22  },
-    { pct: 15,  idx: 28  },
-    { pct: 30,  idx: 34  },
-    { pct: 45,  idx: 70  },
-    { pct: 60,  idx: 112 },
-    { pct: 70,  idx: 148 },
-    { pct: 80,  idx: 184 },
-    { pct: 88,  idx: 220 },
-    { pct: 93,  idx: 208 },
-    { pct: 97,  idx: 196 },
-    { pct: 100, idx: 160 },
+function gradientColor(percent: number): string {
+  const stops: { pct: number; r: number; g: number; b: number }[] = [
+    { pct: 0,   r: 0,   g: 180, b: 0   },
+    { pct: 25,  r: 80,  g: 200, b: 0   },
+    { pct: 50,  r: 200, g: 200, b: 0   },
+    { pct: 70,  r: 255, g: 160, b: 0   },
+    { pct: 85,  r: 255, g: 80,  b: 0   },
+    { pct: 100, r: 220, g: 0,   b: 0   },
   ];
 
   // 找到当前百分比所在的区间
@@ -131,21 +128,23 @@ function gradientColor256(percent: number): string {
     }
   }
 
-  // 在区间内线性插值
+  // 线性插值 RGB
   const range = upper.pct - lower.pct;
-  if (range === 0) return `\x1b[38;5;${lower.idx}m`;
-  const t = (percent - lower.pct) / range;
-  const idx = Math.round(lower.idx + (upper.idx - lower.idx) * t);
-  return `\x1b[38;5;${idx}m`;
+  const t = range === 0 ? 0 : (percent - lower.pct) / range;
+  const r = Math.round(lower.r + (upper.r - lower.r) * t);
+  const g = Math.round(lower.g + (upper.g - lower.g) * t);
+  const b = Math.round(lower.b + (upper.b - lower.b) * t);
+
+  return `\x1b[38;2;${r};${g};${b}m`;
 }
 
 export function getContextColor(percent: number, colors?: Record<string, string>): string {
-  // 如果用户自定义了 context 颜色且不是默认值，尊重用户配置
-  if (colors?.context && colors.context !== 'green') {
+  // 如果用户自定义了 context 颜色，尊重用户配置
+  if (colors?.context) {
     return resolveAnsi(colors.context, GREEN);
   }
-  // 使用平滑渐变
-  return gradientColor256(percent);
+  // 使用真彩色平滑渐变
+  return gradientColor(percent);
 }
 
 // ---- 使用率进度条颜色 ----
