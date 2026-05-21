@@ -12,27 +12,27 @@ export function renderSessionLine(ctx: RenderContext): string {
   const colors = ctx.config?.colors;
   const display = ctx.config?.display;
 
-  // 模型名称
+  // 模型名称 🤖
   if (display?.showModel !== false) {
     const modelName = getModelName(ctx.stdin);
-    parts.push(model(`[${modelName}]`, colors));
+    parts.push(model(`🤖 [${modelName}]`, colors));
   }
 
-  // 项目路径
+  // 项目路径 📁
   const projectDir = ctx.stdin.cwd || ctx.stdin.workspace?.current_dir || '';
   if (projectDir) {
     const depth = ctx.config?.pathLevels ?? 1;
     const segments = projectDir.replace(/\\/g, '/').split('/').filter(Boolean);
     const shortPath = segments.slice(-depth).join('/');
-    parts.push(project(shortPath, colors));
+    parts.push(project(`📁 ${shortPath}`, colors));
   }
 
-  // Git 分支
+  // Git 分支 🌿
   if (ctx.config?.gitStatus?.enabled && ctx.gitBranch) {
-    const dirty = ctx.gitDirty && ctx.config.gitStatus.showDirty ? '*' : '';
-    const branchStr = `git:(${gitBranch(ctx.gitBranch, colors)}${dirty})`;
-    parts.push(git('│', colors) + ' ' + branchStr);
+    const dirty = ctx.gitDirty && ctx.config.gitStatus.showDirty ? ' ●' : '';
+    const branchStr = `🌿 ${gitBranch(ctx.gitBranch, colors)}${dirty}`;
+    parts.push(branchStr);
   }
 
-  return parts.join(' ');
+  return parts.join(' │ ');
 }
