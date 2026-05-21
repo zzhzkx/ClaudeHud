@@ -18,13 +18,23 @@ export function parseTranscript(transcriptPath: string): TranscriptData {
 
   if (!transcriptPath) return result;
 
-  let lines: string[];
+  let content: string;
   try {
-    const content = readFileSync(transcriptPath, 'utf-8');
-    lines = content.split('\n').filter((l) => l.trim());
+    content = readFileSync(transcriptPath, 'utf-8');
   } catch {
-    return result;
+    // 文件可能正在被写入中，等待一下再重试一次
+    try {
+      const { setTimeout } = require('node:timers/promises');
+      // 同步等待 50ms（用 busy wait 避免 async）
+      const start = Date.now();
+      while (Date.now() - start < 50) {}
+      content = readFileSync(transcriptPath, 'utf-8');
+    } catch {
+      return result;
+    }
   }
+
+  const lines = content.split('\n').filter((l) => l.trim());
 
   const toolMap = new Map<string, ToolEntry>();
   const agentMap = new Map<string, AgentEntry>();
@@ -107,7 +117,7 @@ export function parseTranscript(transcriptPath: string): TranscriptData {
       }
     }
 
-    // 最后 assistant 响应时间（用于 prompt cache 倒计时）
+    // 最后 assistant 响应时间
     if (type === 'assistant' && entry.timestamp) {
       result.lastAssistantResponseAt = new Date(entry.timestamp);
     }
