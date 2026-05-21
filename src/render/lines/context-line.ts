@@ -13,17 +13,6 @@ function formatTokens(n: number): string {
   return n.toString();
 }
 
-/** 格式化时间间隔为人类可读字符串 */
-function formatElapsed(ms: number): string {
-  const secs = Math.floor(ms / 1000);
-  if (secs < 60) return `${secs}s`;
-  const mins = Math.floor(secs / 60);
-  if (mins < 60) return `${mins}m`;
-  const hours = Math.floor(mins / 60);
-  const remainMins = mins % 60;
-  return `${hours}h ${remainMins}m`;
-}
-
 /** 渲染上下文使用行 */
 export function renderContextLine(ctx: RenderContext): string | null {
   const display = ctx.config?.display;
@@ -37,7 +26,7 @@ export function renderContextLine(ctx: RenderContext): string | null {
   const bar = coloredBar(percent, 10, colors);
 
   // 数值显示
-  const mode = display?.contextValue ?? 'both';
+  const mode = display?.contextValue ?? 'percent';
   const size = getContextWindowSize(ctx.stdin);
   const used = getTotalTokens(ctx.stdin);
 
@@ -58,13 +47,5 @@ export function renderContextLine(ctx: RenderContext): string | null {
       break;
   }
 
-  // 距上次回复时长
-  const parts = [`${ctxLabel} ${bar} ${valueStr}`];
-  if (ctx.transcript.lastAssistantResponseAt) {
-    const elapsed = Date.now() - ctx.transcript.lastAssistantResponseAt.getTime();
-    const elapsedStr = formatElapsed(elapsed);
-    parts.push(label(`⏱ ${elapsedStr}`, colors));
-  }
-
-  return parts.join(' │ ');
+  return `${ctxLabel} ${bar} ${valueStr}`;
 }
