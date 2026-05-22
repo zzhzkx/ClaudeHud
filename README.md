@@ -1,4 +1,4 @@
-# ClaudeHub 🖥️
+# ClaudeHud 🖥️
 
 > 为 Claude Code CLI 提供实时 HUD 状态栏
 
@@ -13,8 +13,8 @@
 ## 安装
 
 ```bash
-git clone https://github.com/yourname/claudehub
-cd claudehub
+git clone https://github.com/yourname/claudehud
+cd claudehud
 npm install
 npm run build
 ```
@@ -33,7 +33,7 @@ npm run build
 
 ### 方法二：使用配置文件
 
-在项目根目录或 home 目录下创建 `.claudehub.json`：
+在项目根目录或 home 目录下创建 `.claudehud.json`：
 
 ```json
 {
