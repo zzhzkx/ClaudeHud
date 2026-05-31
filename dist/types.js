@@ -21,10 +21,10 @@ export const DEFAULT_CONFIG = {
         showTodos: false,
         showUsage: true,
         usageBarEnabled: true,
-        showDuration: false,
+        showDuration: true,
         showCost: false,
         showMemoryUsage: false,
-        showSessionTokens: false,
+        showSessionTokens: true,
         timeFormat: 'relative',
     },
     colors: {
