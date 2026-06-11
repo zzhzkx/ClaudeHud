@@ -79,6 +79,10 @@ export function gitBranch(text: string, colors?: Record<string, string>): string
   return colorize(text, resolveAnsi(colors?.gitBranch, CYAN));
 }
 
+export function effort(text: string, colors?: Record<string, string>): string {
+  return colorize(text, resolveAnsi(colors?.effort, MAGENTA));
+}
+
 export function label(text: string, colors?: Record<string, string>): string {
   return colorize(text, resolveAnsi(colors?.label, DIM));
 }

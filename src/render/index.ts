@@ -10,6 +10,7 @@ import { renderToolsLine } from './lines/tools-line.js';
 import { renderAgentsLine } from './lines/agents-line.js';
 import { renderTodosLine } from './lines/todos-line.js';
 import { renderSessionTokensLine } from './lines/session-tokens-line.js';
+import { renderEffortLine } from './lines/effort.js';
 
 /**
  * 渲染完整的 HUD 输出
@@ -48,6 +49,8 @@ export function render(ctx: RenderContext): string {
     if (contextLine) contextParts.push(contextLine);
     const usageLine = renderUsageLine(ctx);
     if (usageLine) contextParts.push(usageLine);
+    const effortLine = renderEffortLine(ctx);
+    if (effortLine) contextParts.push(effortLine);
     if (contextParts.length > 0) {
       lines.push(contextParts.join(' │ '));
     }

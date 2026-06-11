@@ -129,6 +129,7 @@ export interface HudConfig {
     showUsage: boolean;
     usageBarEnabled: boolean;
     showDuration: boolean;
+    showEffort: boolean;
     showCost: boolean;
     showMemoryUsage: boolean;
     showSessionTokens: boolean;
@@ -139,6 +140,7 @@ export interface HudConfig {
     usage: string;
     warning: string;
     critical: string;
+    effort: string;
     model: string;
     project: string;
     git: string;
@@ -180,6 +182,7 @@ export const DEFAULT_CONFIG: HudConfig = {
     showUsage: true,
     usageBarEnabled: true,
     showDuration: true,
+    showEffort: true,
     showCost: false,
     showMemoryUsage: false,
     showSessionTokens: true,
@@ -190,6 +193,7 @@ export const DEFAULT_CONFIG: HudConfig = {
     usage: 'brightBlue',
     warning: 'yellow',
     critical: 'red',
+    effort: 'magenta',
     model: 'cyan',
     project: 'yellow',
     git: 'magenta',

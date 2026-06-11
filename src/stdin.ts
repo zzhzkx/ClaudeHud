@@ -258,3 +258,13 @@ export function getUsageFromStdin(stdin: StdinData): UsageData | null {
       : null,
   };
 }
+
+// ---- Effort ----
+
+/** 从 stdin 提取 effort 级别 */
+export function getEffort(stdin: StdinData): string | null {
+  const effort = stdin.effort;
+  if (!effort) return null;
+  if (typeof effort === 'string') return effort;
+  return effort.level ?? null;
+}

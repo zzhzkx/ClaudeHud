@@ -13,14 +13,16 @@
     "showContextBar": true,
     "contextValue": "both",
     "showTools": true,
-    "showAgents": false,
-    "showTodos": false,
+    "showAgents": true,
+    "showTodos": true,
     "showUsage": true,
     "usageBarEnabled": true,
     "showDuration": true,
-    "showCost": false,
-    "showMemoryUsage": false,
-    "showSessionTokens": true
+    "showEffort": true,
+    "showCost": true,
+    "showMemoryUsage": true,
+    "showSessionTokens": true,
+    "timeFormat": "relative"
   },
   "colors": {
     "context": "green",
@@ -31,6 +33,7 @@
     "project": "yellow",
     "git": "magenta",
     "gitBranch": "cyan",
-    "label": "dim"
+    "label": "dim",
+    "effort": "magenta"
   }
 }
