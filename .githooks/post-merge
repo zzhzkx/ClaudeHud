@@ -1,0 +1,6 @@
+#!/bin/sh
+# 在 git pull/merge 后自动重新编译 TypeScript
+echo "--- 检测到代码更新，自动重新编译 TypeScript... ---"
+cd "$(dirname "$0")/.."
+npm run build 2>/dev/null || echo "⚠️ 编译失败，请手动运行 npm run build"
+echo "--- 编译完成 ---"
