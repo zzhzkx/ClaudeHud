@@ -130,6 +130,7 @@ export interface HudConfig {
     usageBarEnabled: boolean;
     showDuration: boolean;
     showEffort: boolean;
+    effortDisplayMap?: Record<string, string>;
     showCost: boolean;
     showMemoryUsage: boolean;
     showSessionTokens: boolean;

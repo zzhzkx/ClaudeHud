@@ -15,4 +15,6 @@ export declare function formatDuration(ms: number): string;
 export declare function getSessionTokens(stdin: StdinData): SessionTokenUsage | null;
 /** 从 stdin 提取使用率数据 */
 export declare function getUsageFromStdin(stdin: StdinData): UsageData | null;
+/** 从 stdin 提取 effort 级别 */
+export declare function getEffort(stdin: StdinData): string | null;
 //# sourceMappingURL=stdin.d.ts.map

@@ -19,6 +19,9 @@
     "usageBarEnabled": true,
     "showDuration": true,
     "showEffort": true,
+    "effortDisplayMap": {
+      "xhigh": "ultracode"
+    },
     "showCost": true,
     "showMemoryUsage": true,
     "showSessionTokens": true,

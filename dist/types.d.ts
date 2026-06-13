@@ -119,6 +119,8 @@ export interface HudConfig {
         showUsage: boolean;
         usageBarEnabled: boolean;
         showDuration: boolean;
+        showEffort: boolean;
+        effortDisplayMap?: Record<string, string>;
         showCost: boolean;
         showMemoryUsage: boolean;
         showSessionTokens: boolean;
@@ -129,6 +131,7 @@ export interface HudConfig {
         usage: string;
         warning: string;
         critical: string;
+        effort: string;
         model: string;
         project: string;
         git: string;

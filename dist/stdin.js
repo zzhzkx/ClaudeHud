@@ -242,4 +242,14 @@ export function getUsageFromStdin(stdin) {
             : null,
     };
 }
+// ---- Effort ----
+/** 从 stdin 提取 effort 级别 */
+export function getEffort(stdin) {
+    const effort = stdin.effort;
+    if (!effort)
+        return null;
+    if (typeof effort === 'string')
+        return effort;
+    return effort.level ?? null;
+}
 //# sourceMappingURL=stdin.js.map

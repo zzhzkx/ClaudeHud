@@ -9,6 +9,11 @@ export declare function model(text: string, colors?: Record<string, string>): st
 export declare function project(text: string, colors?: Record<string, string>): string;
 export declare function git(text: string, colors?: Record<string, string>): string;
 export declare function gitBranch(text: string, colors?: Record<string, string>): string;
+export declare function effort(text: string, colors?: Record<string, string>): string;
+/** 根据 effort 级别获取颜色，支持动态循环效果 */
+export declare function getEffortColor(level: string, colors?: Record<string, string>): string;
+/** 使用 effort 级别感知的彩色文本渲染 */
+export declare function effortColored(text: string, level: string, colors?: Record<string, string>): string;
 export declare function label(text: string, colors?: Record<string, string>): string;
 export declare function warning(text: string, colors?: Record<string, string>): string;
 export declare function critical(text: string, colors?: Record<string, string>): string;

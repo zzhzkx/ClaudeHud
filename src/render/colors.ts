@@ -83,6 +83,63 @@ export function effort(text: string, colors?: Record<string, string>): string {
   return colorize(text, resolveAnsi(colors?.effort, MAGENTA));
 }
 
+// ---- Effort 颜色（按级别区分） ----
+
+const EFFORT_DYNAMIC_COLORS = [
+  '\x1b[35m',           // magenta
+  '\x1b[95m',           // bright magenta
+  '\x1b[38;5;93m',      // purple (256-color)
+  '\x1b[95m',           // bright magenta
+];
+const ULTRACODE_DYNAMIC_COLORS = [
+  '\x1b[35m',           // magenta
+  '\x1b[36m',           // cyan
+  '\x1b[32m',           // green
+  '\x1b[33m',           // yellow
+  '\x1b[95m',           // bright magenta
+  '\x1b[36m',           // cyan
+  '\x1b[32m',           // green
+  '\x1b[35m',           // magenta
+];
+
+/** 根据 effort 级别获取颜色，支持动态循环效果 */
+export function getEffortColor(
+  level: string,
+  colors?: Record<string, string>
+): string {
+  // 用户自定义颜色优先
+  if (colors?.effort) {
+    return resolveAnsi(colors.effort, MAGENTA);
+  }
+
+  switch (level) {
+    case 'low':
+      return GREEN;
+    case 'medium':
+      return YELLOW;
+    case 'xhigh':
+    case 'high':
+      return MAGENTA;
+    case 'max': {
+      // 基于时间动态循环 → 每 2 秒轮换一次颜色
+      const idx = Math.floor(Date.now() / 2000) % EFFORT_DYNAMIC_COLORS.length;
+      return EFFORT_DYNAMIC_COLORS[idx];
+    }
+    case 'ultracode': {
+      // 多彩动态循环 → 每 1.5 秒轮换一次彩虹色
+      const idx = Math.floor(Date.now() / 1500) % ULTRACODE_DYNAMIC_COLORS.length;
+      return ULTRACODE_DYNAMIC_COLORS[idx];
+    }
+    default:
+      return MAGENTA;
+  }
+}
+
+/** 使用 effort 级别感知的彩色文本渲染 */
+export function effortColored(text: string, level: string, colors?: Record<string, string>): string {
+  return colorize(text, getEffortColor(level, colors));
+}
+
 export function label(text: string, colors?: Record<string, string>): string {
   return colorize(text, resolveAnsi(colors?.label, DIM));
 }
