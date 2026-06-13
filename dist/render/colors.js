@@ -94,8 +94,9 @@ export function getEffortColor(level, colors) {
             return GREEN;
         case 'medium':
             return YELLOW;
-        case 'xhigh':
         case 'high':
+            return BRIGHT_MAGENTA;
+        case 'xhigh':
             return MAGENTA;
         case 'max': {
             // 基于时间动态循环 → 每 2 秒轮换一次颜色
