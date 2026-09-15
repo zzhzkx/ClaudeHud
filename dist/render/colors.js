@@ -85,8 +85,8 @@ const ULTRACODE_DYNAMIC_COLORS = [
 ];
 /** 根据 effort 级别获取颜色，支持动态循环效果 */
 export function getEffortColor(level, colors) {
-    // 用户自定义颜色优先
-    if (colors?.effort) {
+    // 'auto'（默认）按级别取色；其它值视为用户自定义颜色
+    if (colors?.effort && colors.effort !== 'auto') {
         return resolveAnsi(colors.effort, MAGENTA);
     }
     switch (level) {
@@ -168,11 +168,10 @@ function gradientColor(percent) {
     return `\x1b[38;2;${r};${g};${b}m`;
 }
 export function getContextColor(percent, colors) {
-    // 如果用户自定义了 context 颜色，尊重用户配置
-    if (colors?.context) {
+    // 'gradient'（默认）用真彩色平滑渐变；其它值视为用户自定义颜色
+    if (colors?.context && colors.context !== 'gradient') {
         return resolveAnsi(colors.context, GREEN);
     }
-    // 使用真彩色平滑渐变
     return gradientColor(percent);
 }
 // ---- 使用率进度条颜色 ----

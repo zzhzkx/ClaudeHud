@@ -125,6 +125,8 @@ export function getContextWindowSize(stdin: StdinData): number {
   const reported = stdin.context_window?.context_window_size;
   if (reported && reported > 0) return reported;
   const modelId = stdin.model?.id?.toLowerCase() ?? '';
+  // 1M 上下文版本带 [1M] 标记，优先于表里的 200k 条目
+  if (modelId.includes('[1m]') || modelId.includes('-1m')) return 1_000_000;
   for (const [key, size] of Object.entries(CONTEXT_WINDOW_SIZES)) {
     if (modelId.includes(key)) return size;
   }

@@ -14,6 +14,7 @@
 - **📈 使用率** — Claude 订阅的使用率限制（5小时/7天窗口）
 - **🔧 工具活动** — 实时显示正在运行和已完成的工具调用
 - **📋 Session Tokens** — 本轮会话的输入/输出/缓存 token 用量
+- **⚡ Effort** — 当前 reasoning effort 级别（按级别配色）
 
 ---
 
@@ -90,12 +91,11 @@ ClaudeHub 会在以下位置查找配置文件（**第一个找到的生效**）
     "showUsage": true,
     "usageBarEnabled": true,
     "showDuration": true,
-    "showCost": false,
-    "showMemoryUsage": false,
-    "showSessionTokens": true
+    "showSessionTokens": true,
+    "maxLines": 0
   },
   "colors": {
-    "context": "green",
+    "context": "gradient",
     "usage": "brightBlue",
     "warning": "yellow",
     "critical": "red",
@@ -103,7 +103,8 @@ ClaudeHub 会在以下位置查找配置文件（**第一个找到的生效**）
     "project": "yellow",
     "git": "magenta",
     "gitBranch": "cyan",
-    "label": "dim"
+    "label": "dim",
+    "effort": "auto"
   }
 }
 ```
@@ -126,9 +127,37 @@ ClaudeHub 会在以下位置查找配置文件（**第一个找到的生效**）
 | `display.showUsage` | boolean | `true` | 显示使用率限制 |
 | `display.usageBarEnabled` | boolean | `true` | 使用率显示为进度条 |
 | `display.showDuration` | boolean | `false` | 显示会话时长 |
-| `display.showCost` | boolean | `false` | 显示会话费用 |
 | `display.showSessionTokens` | boolean | `false` | 显示 Session Token 用量 |
-| `display.showMemoryUsage` | boolean | `false` | 显示系统内存使用 |
+| `display.maxLines` | number | `0` | 状态栏最多显示行数（`0` = 不限） |
+| `colors.context` | string | `gradient` | 上下文进度条颜色；`gradient` = 真彩色平滑渐变 |
+| `colors.effort` | string | `auto` | effort 颜色；`auto` = 按级别取色（low 绿 / medium 黄 / high 亮品红 / xhigh 品红 / max 与 ultracode 动态循环） |
+
+---
+
+## 宽度自适应
+
+状态栏的每一行如果超过终端列宽，终端会把这一行**折成两行**，而 Claude Code 是按
+“逻辑行”做光标记账的，于是后续重绘就会错位、错乱（表现为状态栏花屏，重新拉伸
+一次终端窗口才恢复）。
+
+ClaudeHub 因此在渲染末尾读取 Claude Code 注入的环境变量 `COLUMNS`（终端列宽），
+把每一行裁到列宽以内（宽度感知：CJK / emoji 按 2 列计，ANSI 转义序列不占列宽，
+超宽处补省略号 `…`）。同时清洗 transcript 文本里的换行 / 控制字符，避免一条
+待办或 Agent 描述里残留的 `\n` 让状态栏多出物理行。
+
+拿不到 `COLUMNS` 时不裁剪（保持原样输出）。
+
+---
+
+## 每次渲染的开销
+
+状态栏命令是**每次重绘新起一个进程**（不是常驻进程），所以进程内缓存一律无效：
+
+- 每次渲染 = 1 次 `settings.json` 读取 + 1 次 transcript 全量解析 + 1 次 git 调用 + 渲染
+- transcript 全量解析实测约 **25ms / 5MB**，不值得为它做增量缓存；原先的“增量解析”
+  在每次渲染都是新进程的前提下永远走不到（该分支与相关的进程内缓存已删除）
+- git 状态由一次 `git status --short --branch` 同时给出分支 / 脏状态 / 领先落后
+  （原先要跑 3 个 git 子进程）
 
 ---
 
@@ -169,9 +198,9 @@ ClaudeHub 会自动读取 `ANTHROPIC_DEFAULT_*_MODEL_NAME` 作为模型显示名
 
 ```
 🤖 [LongCat-2.0-Preview] │ 📁 ClaudeHud │ 🌿 main ● │ ⏱ 2h 15m
-上下文 █████░░░░░ 45% (90k/200k) │ 使用率 5h: ██░░░░░░░░ 25% | 7d: █░░░░░░░░░ 10%
+上下文 █████░░░░░ 45% (90k/200k) │ 使用率 5h: ██░░░░░░░░ 25% | 7d: █░░░░░░░░░ 10% │ ⚡ high
 ◐ Edit: auth.ts │ ✓ Read ×3 │ ✓ Grep ×2
-📥 输入 45k │ 📤 输出 12k │ 📝 缓存写 8k │ 📖 缓存读 120k
+📥 输入 45k │ 📤 输出 12k │ ✏️ 缓存写 8k │ 📖 缓存读 120k
 ```
 
 ### 紧凑模式
@@ -212,20 +241,22 @@ npm test         # 运行测试
 ```
 ClaudeHub/
 ├── src/
-│   ├── index.ts                    # 主入口（数据获取、缓存、渲染调度）
+│   ├── index.ts                    # 主入口（数据获取、渲染调度）
 │   ├── types.ts                    # 类型定义 + 默认配置
 │   ├── constants.ts                # 常量（阈值、上下文窗口大小）
 │   ├── stdin.ts                    # stdin 读取、模型名称解析、token 计算
-│   ├── transcript.ts               # Transcript JSONL 增量解析
-│   ├── git.ts                      # Git 状态获取
+│   ├── transcript.ts               # Transcript JSONL 解析（含文本清洗）
+│   ├── git.ts                      # Git 状态获取（单次 git 调用）
 │   ├── config.ts                   # 配置文件加载
 │   └── render/
 │       ├── index.ts                # 渲染器主入口（布局调度）
 │       ├── colors.ts               # ANSI 颜色、真彩色渐变、进度条
+│       ├── fit.ts                  # 列宽自适应（裁剪超宽行，防折行错乱）
 │       └── lines/                  # 各行渲染逻辑
 │           ├── session-line.ts     # 模型 + 项目 + Git + 时长
 │           ├── context-line.ts     # 上下文进度条
 │           ├── usage.ts            # 使用率进度条
+│           ├── effort.ts           # reasoning effort 级别
 │           ├── tools-line.ts       # 工具活动
 │           ├── agents-line.ts      # Agent 活动
 │           ├── todos-line.ts       # 待办进度

@@ -2,53 +2,68 @@
 // ClaudeHub - Git 状态获取
 // ============================================================
 import { execSync } from 'node:child_process';
-/** 获取当前目录的 Git 状态 */
+/**
+ * 获取当前目录的 Git 状态
+ * `git status --short --branch` 一次就同时给出分支、脏状态、领先/落后，
+ * 所以不必再分别跑 `git branch` / `git status` / `git rev-list`。
+ */
 export function getGitStatus(cwd) {
     const baseOpts = cwd ? { cwd } : {};
-    let branch = '';
-    let dirty = false;
-    let ahead = 0;
-    let behind = 0;
+    let out;
     try {
-        // 获取当前分支
-        branch = execSync('git branch --show-current', {
+        out = execSync('git status --short --branch', {
             ...baseOpts,
             encoding: 'utf-8',
             timeout: 3000,
-        }).trim();
+        });
     }
     catch {
         // 不在 git 仓库中或 git 不可用
         return { branch: '', dirty: false, ahead: 0, behind: 0 };
     }
-    try {
-        // 检查是否有未提交的更改
-        const status = execSync('git status --porcelain', {
-            ...baseOpts,
-            encoding: 'utf-8',
-            timeout: 3000,
-        });
-        dirty = status.trim().length > 0;
+    const lines = out.split('\n').filter((l) => l.trim());
+    if (lines.length === 0)
+        return { branch: '', dirty: false, ahead: 0, behind: 0 };
+    const header = lines[0];
+    return {
+        branch: parseBranch(header),
+        dirty: lines.length > 1,
+        ahead: parseCount(header, 'ahead'),
+        behind: parseCount(header, 'behind'),
+    };
+}
+/** 从 `## main...origin/main [ahead 1, behind 2]` 里取分支名 */
+function parseBranch(header) {
+    let rest = header.trim();
+    if (rest.startsWith('##'))
+        rest = rest.slice(2);
+    rest = rest.trim();
+    if (!rest)
+        return '';
+    const dotIdx = rest.indexOf('...');
+    if (dotIdx > 0)
+        rest = rest.slice(0, dotIdx);
+    const spaceIdx = rest.indexOf(' ');
+    if (spaceIdx > 0)
+        rest = rest.slice(0, spaceIdx);
+    const name = rest.trim();
+    if (!name || name === 'HEAD' || name.startsWith('No commits'))
+        return '';
+    return name;
+}
+/** 从头部行里取 `[ahead N]` / `[behind N]` 的计数 */
+function parseCount(header, key) {
+    const open = header.indexOf(`[${key} `);
+    if (open === -1)
+        return 0;
+    const rest = header.slice(open + key.length + 2);
+    let digits = '';
+    for (const ch of [...rest]) {
+        if (ch >= '0' && ch <= '9')
+            digits += ch;
+        else
+            break;
     }
-    catch {
-        // ignore
-    }
-    try {
-        // 检查领先/落后远程的提交数
-        const revList = execSync('git rev-list --left-right --count HEAD...@{upstream}', {
-            ...baseOpts,
-            encoding: 'utf-8',
-            timeout: 3000,
-        }).trim();
-        const parts = revList.split('\t');
-        if (parts.length === 2) {
-            ahead = parseInt(parts[0], 10) || 0;
-            behind = parseInt(parts[1], 10) || 0;
-        }
-    }
-    catch {
-        // 没有上游分支
-    }
-    return { branch, dirty, ahead, behind };
+    return digits ? Number(digits) : 0;
 }
 //# sourceMappingURL=git.js.map

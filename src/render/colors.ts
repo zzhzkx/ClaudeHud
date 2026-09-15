@@ -107,8 +107,8 @@ export function getEffortColor(
   level: string,
   colors?: Record<string, string>
 ): string {
-  // 用户自定义颜色优先
-  if (colors?.effort) {
+  // 'auto'（默认）按级别取色；其它值视为用户自定义颜色
+  if (colors?.effort && colors.effort !== 'auto') {
     return resolveAnsi(colors.effort, MAGENTA);
   }
 
@@ -201,11 +201,10 @@ function gradientColor(percent: number): string {
 }
 
 export function getContextColor(percent: number, colors?: Record<string, string>): string {
-  // 如果用户自定义了 context 颜色，尊重用户配置
-  if (colors?.context) {
+  // 'gradient'（默认）用真彩色平滑渐变；其它值视为用户自定义颜色
+  if (colors?.context && colors.context !== 'gradient') {
     return resolveAnsi(colors.context, GREEN);
   }
-  // 使用真彩色平滑渐变
   return gradientColor(percent);
 }
 

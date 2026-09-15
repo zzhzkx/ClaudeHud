@@ -81,14 +81,6 @@ export interface UsageData {
   sevenDayResetAt: Date | null;
 }
 
-/** 系统内存信息 */
-export interface MemoryInfo {
-  totalBytes: number;
-  usedBytes: number;
-  freeBytes: number;
-  usedPercent: number;
-}
-
 /** 会话 Token 用量 */
 export interface SessionTokenUsage {
   inputTokens: number;
@@ -130,16 +122,18 @@ export interface HudConfig {
     usageBarEnabled: boolean;
     showDuration: boolean;
     showEffort: boolean;
-    showCost: boolean;
-    showMemoryUsage: boolean;
     showSessionTokens: boolean;
     timeFormat: 'relative' | 'absolute' | 'both';
+    /** 状态栏最多显示行数（0 = 不限） */
+    maxLines?: number;
   };
   colors: {
+    /** 'gradient' = 真彩色平滑渐变（默认） */
     context: string;
     usage: string;
     warning: string;
     critical: string;
+    /** 'auto' = 按 effort 级别取色（默认） */
     effort: string;
     model: string;
     project: string;
@@ -155,7 +149,6 @@ export interface RenderContext {
   transcript: TranscriptData;
   sessionDuration: string;
   usageData: UsageData | null;
-  memoryUsage: MemoryInfo | null;
   config: HudConfig;
   gitBranch?: string;
   gitDirty?: boolean;
@@ -183,17 +176,16 @@ export const DEFAULT_CONFIG: HudConfig = {
     usageBarEnabled: true,
     showDuration: true,
     showEffort: true,
-    showCost: false,
-    showMemoryUsage: false,
     showSessionTokens: true,
     timeFormat: 'relative',
+    maxLines: 0,
   },
   colors: {
-    context: 'green',
+    context: 'gradient',
     usage: 'brightBlue',
     warning: 'yellow',
     critical: 'red',
-    effort: 'magenta',
+    effort: 'auto',
     model: 'cyan',
     project: 'yellow',
     git: 'magenta',

@@ -11,6 +11,7 @@ import { renderAgentsLine } from './lines/agents-line.js';
 import { renderTodosLine } from './lines/todos-line.js';
 import { renderSessionTokensLine } from './lines/session-tokens-line.js';
 import { renderEffortLine } from './lines/effort.js';
+import { fitLines, getTerminalColums } from './fit.js';
 
 /**
  * 渲染完整的 HUD 输出
@@ -72,7 +73,9 @@ export function render(ctx: RenderContext): string {
     if (sessionTokensLine) lines.push(sessionTokensLine);
   }
 
-  const output = lines.join('\n');
+  // 裁到终端列宽，避免折行导致状态栏错乱
+  const fitted = fitLines(lines, getTerminalColums(), ctx.config?.display?.maxLines ?? 0);
+  const output = fitted.join('\n');
   console.log(output);
   return output;
 }

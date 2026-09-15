@@ -19,13 +19,12 @@
     "usageBarEnabled": true,
     "showDuration": true,
     "showEffort": true,
-    "showCost": true,
-    "showMemoryUsage": true,
     "showSessionTokens": true,
-    "timeFormat": "relative"
+    "timeFormat": "relative",
+    "maxLines": 0
   },
   "colors": {
-    "context": "green",
+    "context": "gradient",
     "usage": "brightBlue",
     "warning": "yellow",
     "critical": "red",
@@ -34,6 +33,6 @@
     "git": "magenta",
     "gitBranch": "cyan",
     "label": "dim",
-    "effort": "magenta"
+    "effort": "auto"
   }
 }
