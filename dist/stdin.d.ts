@@ -9,7 +9,7 @@ export declare function getContextPercent(stdin: StdinData): number;
 export declare function getContextWindowSize(stdin: StdinData): number;
 /** 获取模型显示名称 */
 export declare function getModelName(stdin: StdinData): string;
-/** 格式化时长：毫秒 → 人类可读字符串 */
+/** 格式化时长：毫秒 → 人类可读字符串（始终精确到秒） */
 export declare function formatDuration(ms: number): string;
 /** 从 stdin 提取 session token 用量 */
 export declare function getSessionTokens(stdin: StdinData): SessionTokenUsage | null;

@@ -193,7 +193,7 @@ function normalizeModelId(modelId) {
     return titled.replace(/(\d+)\s+(?=\d)/g, '$1.');
 }
 // ---- 时长 ----
-/** 格式化时长：毫秒 → 人类可读字符串 */
+/** 格式化时长：毫秒 → 人类可读字符串（始终精确到秒） */
 export function formatDuration(ms) {
     if (ms < 0)
         ms = 0;
@@ -201,12 +201,10 @@ export function formatDuration(ms) {
     const minutes = Math.floor(seconds / 60);
     const hours = Math.floor(minutes / 60);
     if (hours > 0) {
-        const m = minutes % 60;
-        return m > 0 ? `${hours}h ${m}m` : `${hours}h`;
+        return `${hours}h ${minutes % 60}m ${seconds % 60}s`;
     }
     if (minutes > 0) {
-        const s = seconds % 60;
-        return s > 0 ? `${minutes}m ${s}s` : `${minutes}m`;
+        return `${minutes}m ${seconds % 60}s`;
     }
     return `${seconds}s`;
 }
