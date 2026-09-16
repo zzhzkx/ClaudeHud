@@ -226,7 +226,7 @@ ClaudeHub 会自动读取 `ANTHROPIC_DEFAULT_*_MODEL_NAME` 作为模型显示名
 
 ```
 🤖 [LongCat-2.0-Preview] │ 📁 ClaudeHud │ 🌿 main ● │ ⏱ 2h 15m
-上下文 █████░░░░░ 45% (90k/200k) │ 使用率 5h: ██░░░░░░░░ 25% | 7d: █░░░░░░░░░ 10% │ ⚡ high │ 🚀 15.7 t/s 120s
+上下文 █████░░░░░ 45% (90k/200k) │ 使用率 5h: ██░░░░░░░░ 25% | 7d: █░░░░░░░░░ 10% │ ⚡ high │ 🚀 15.7 t/s
 ◐ Edit: auth.ts │ ✓ Read ×3 │ ✓ Grep ×2
 📥 输入 45k │ 📤 输出 12k │ ✏️ 缓存写 8k │ 📖 缓存读 120k
 ```

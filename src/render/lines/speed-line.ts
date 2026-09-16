@@ -20,8 +20,5 @@ export function renderSpeedLine(ctx: RenderContext): string | null {
   if (tps === null || !Number.isFinite(tps) || tps <= 0) return null;
 
   const colors = ctx.config?.colors;
-  const window = display.speedWindow ?? 120;
-  const scope = window > 0 ? `${window}s` : 'avg';
-
-  return `${label('🚀', colors)} ${cyan(formatSpeed(tps))} ${label(scope, colors)}`;
+  return `${label('🚀', colors)} ${cyan(formatSpeed(tps))}`;
 }
