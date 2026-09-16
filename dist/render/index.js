@@ -9,6 +9,7 @@ import { renderAgentsLine } from './lines/agents-line.js';
 import { renderTodosLine } from './lines/todos-line.js';
 import { renderSessionTokensLine } from './lines/session-tokens-line.js';
 import { renderEffortLine } from './lines/effort.js';
+import { renderSpeedLine } from './lines/speed-line.js';
 import { fitLines, getTerminalColums } from './fit.js';
 /**
  * 渲染完整的 HUD 输出
@@ -50,6 +51,9 @@ export function render(ctx) {
         const effortLine = renderEffortLine(ctx);
         if (effortLine)
             contextParts.push(effortLine);
+        const speedLine = renderSpeedLine(ctx);
+        if (speedLine)
+            contextParts.push(speedLine);
         if (contextParts.length > 0) {
             lines.push(contextParts.join(' │ '));
         }

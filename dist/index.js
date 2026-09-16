@@ -6,6 +6,7 @@ import { readStdin, getUsageFromStdin, formatDuration } from './stdin.js';
 import { parseTranscript } from './transcript.js';
 import { loadConfig } from './config.js';
 import { getGitStatus } from './git.js';
+import { getOutputSpeed } from './speed.js';
 import { render } from './render/index.js';
 function logError(msg, err) {
     // 输出到 stderr，不影响 stdout 的 HUD 渲染
@@ -25,6 +26,9 @@ async function main() {
         const usageData = config.display?.showUsage !== false
             ? getUsageFromStdin(stdin)
             : null;
+        const outputSpeed = config.display?.showSpeed === true
+            ? getOutputSpeed(stdin.transcript_path ?? '', config.display.speedWindow ?? 120)
+            : null;
         // 计算会话时长
         const sessionStart = transcript.sessionStart;
         const sessionDuration = sessionStart
@@ -35,6 +39,7 @@ async function main() {
             transcript,
             sessionDuration,
             usageData,
+            outputSpeed,
             config,
             gitBranch: gitInfo.branch,
             gitDirty: gitInfo.dirty,

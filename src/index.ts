@@ -8,6 +8,7 @@ import { readStdin, getUsageFromStdin, formatDuration } from './stdin.js';
 import { parseTranscript } from './transcript.js';
 import { loadConfig } from './config.js';
 import { getGitStatus } from './git.js';
+import { getOutputSpeed } from './speed.js';
 import { render } from './render/index.js';
 import type { RenderContext } from './types.js';
 
@@ -33,6 +34,10 @@ async function main(): Promise<void> {
       ? getUsageFromStdin(stdin)
       : null;
 
+    const outputSpeed = config.display?.showSpeed === true
+      ? getOutputSpeed(stdin.transcript_path ?? '', config.display.speedWindow ?? 120)
+      : null;
+
     // 计算会话时长
     const sessionStart = transcript.sessionStart;
     const sessionDuration = sessionStart
@@ -44,6 +49,7 @@ async function main(): Promise<void> {
       transcript,
       sessionDuration,
       usageData,
+      outputSpeed,
       config,
       gitBranch: gitInfo.branch,
       gitDirty: gitInfo.dirty,

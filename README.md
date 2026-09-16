@@ -15,6 +15,7 @@
 - **🔧 工具活动** — 实时显示正在运行和已完成的工具调用
 - **📋 Session Tokens** — 本轮会话的输入/输出/缓存 token 用量
 - **⚡ Effort** — 当前 reasoning effort 级别（按级别配色）
+- **🚀 输出速度** — 模型输出 tokens/秒（滑动窗口）
 
 ---
 
@@ -128,6 +129,8 @@ ClaudeHub 会在以下位置查找配置文件（**第一个找到的生效**）
 | `display.usageBarEnabled` | boolean | `true` | 使用率显示为进度条 |
 | `display.showDuration` | boolean | `false` | 显示会话时长 |
 | `display.showSessionTokens` | boolean | `false` | 显示 Session Token 用量 |
+| `display.showSpeed` | boolean | `true` | 显示输出速度 |
+| `display.speedWindow` | number | `120` | 输出速度的滑动窗口秒数（`0` = 整个会话均值） |
 | `display.maxLines` | number | `0` | 状态栏最多显示行数（`0` = 不限） |
 | `colors.context` | string | `gradient` | 上下文进度条颜色；`gradient` = 真彩色平滑渐变 |
 | `colors.effort` | string | `auto` | effort 颜色；`auto` = 按级别取色（low 绿 / medium 黄 / high 亮品红 / xhigh 品红 / max 与 ultracode 动态循环） |
@@ -146,6 +149,31 @@ ClaudeHub 因此在渲染末尾读取 Claude Code 注入的环境变量 `COLUMNS
 待办或 Agent 描述里残留的 `\n` 让状态栏多出物理行。
 
 拿不到 `COLUMNS` 时不裁剪（保持原样输出）。
+
+---
+
+## 输出速度（tokens/s）
+
+口径照搬 [ccstatusline](https://github.com/sirmalloc/ccstatusline)（MIT）：
+
+```
+每条 assistant 记录的生成区间 = [上一条 user 条目的时间戳, 本组末条 assistant 的时间戳]
+生成时长 = 所有区间「合并重叠」后的总长
+速度 = Σ outputTokens ÷ 生成时长
+```
+
+**合并重叠是精髓**：并发的子 Agent 会让区间互相重叠，不合并就会重复计时。
+
+滑动窗口以「已读到的最后一条记录」为终点向前取 N 秒（不是以最后一条
+assistant 为终点 —— 后者在工具执行期间会停在过去，让窗口不滚动、数字卡住）。
+窗口内只读 transcript 尾部 1MB；`speedWindow: 0` 需要整个会话均值，此时读全文件。
+
+**已知局限 —— 这是估算，不是模型原生吞吐**：
+
+- transcript 里**没有请求发起时间**，所以**首字延迟（TTFT）无法计算**
+- 分母是「user → assistant」的墙钟时间，**混进了你自己思考和打字的时间**。
+  长思考会话上这个数字会明显偏低（实测一个你一小时的读论文会话只有约 5 tok/s）
+- 同一条 `message.id` 会写成多条记录（内容分块流式落盘），按 id 去重，只取该组最后一条
 
 ---
 
@@ -198,7 +226,7 @@ ClaudeHub 会自动读取 `ANTHROPIC_DEFAULT_*_MODEL_NAME` 作为模型显示名
 
 ```
 🤖 [LongCat-2.0-Preview] │ 📁 ClaudeHud │ 🌿 main ● │ ⏱ 2h 15m
-上下文 █████░░░░░ 45% (90k/200k) │ 使用率 5h: ██░░░░░░░░ 25% | 7d: █░░░░░░░░░ 10% │ ⚡ high
+上下文 █████░░░░░ 45% (90k/200k) │ 使用率 5h: ██░░░░░░░░ 25% | 7d: █░░░░░░░░░ 10% │ ⚡ high │ 🚀 15.7 t/s 120s
 ◐ Edit: auth.ts │ ✓ Read ×3 │ ✓ Grep ×2
 📥 输入 45k │ 📤 输出 12k │ ✏️ 缓存写 8k │ 📖 缓存读 120k
 ```
@@ -247,6 +275,7 @@ ClaudeHub/
 │   ├── stdin.ts                    # stdin 读取、模型名称解析、token 计算
 │   ├── transcript.ts               # Transcript JSONL 解析（含文本清洗）
 │   ├── git.ts                      # Git 状态获取（单次 git 调用）
+│   ├── speed.ts                    # 输出速度（tok/s，区间合并 + 滑动窗口）
 │   ├── config.ts                   # 配置文件加载
 │   └── render/
 │       ├── index.ts                # 渲染器主入口（布局调度）
@@ -257,6 +286,7 @@ ClaudeHub/
 │           ├── context-line.ts     # 上下文进度条
 │           ├── usage.ts            # 使用率进度条
 │           ├── effort.ts           # reasoning effort 级别
+│           ├── speed-line.ts       # 输出速度
 │           ├── tools-line.ts       # 工具活动
 │           ├── agents-line.ts      # Agent 活动
 │           ├── todos-line.ts       # 待办进度

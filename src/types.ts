@@ -122,6 +122,9 @@ export interface HudConfig {
     usageBarEnabled: boolean;
     showDuration: boolean;
     showEffort: boolean;
+    showSpeed: boolean;
+    /** 输出速度的滑动窗口秒数（0 = 整个会话均值） */
+    speedWindow: number;
     showSessionTokens: boolean;
     timeFormat: 'relative' | 'absolute' | 'both';
     /** 状态栏最多显示行数（0 = 不限） */
@@ -149,6 +152,7 @@ export interface RenderContext {
   transcript: TranscriptData;
   sessionDuration: string;
   usageData: UsageData | null;
+  outputSpeed: number | null;
   config: HudConfig;
   gitBranch?: string;
   gitDirty?: boolean;
@@ -176,6 +180,8 @@ export const DEFAULT_CONFIG: HudConfig = {
     usageBarEnabled: true,
     showDuration: true,
     showEffort: true,
+    showSpeed: true,
+    speedWindow: 120,
     showSessionTokens: true,
     timeFormat: 'relative',
     maxLines: 0,

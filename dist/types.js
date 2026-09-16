@@ -23,6 +23,8 @@ export const DEFAULT_CONFIG = {
         usageBarEnabled: true,
         showDuration: true,
         showEffort: true,
+        showSpeed: true,
+        speedWindow: 120,
         showSessionTokens: true,
         timeFormat: 'relative',
         maxLines: 0,
