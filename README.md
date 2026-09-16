@@ -130,7 +130,7 @@ ClaudeHub 会在以下位置查找配置文件（**第一个找到的生效**）
 | `display.showDuration` | boolean | `false` | 显示会话时长 |
 | `display.showSessionTokens` | boolean | `false` | 显示 Session Token 用量 |
 | `display.showSpeed` | boolean | `true` | 显示输出速度 |
-| `display.speedWindow` | number | `120` | 输出速度的滑动窗口秒数（`0` = 整个会话均值） |
+| `display.speedWindow` | number | `30` | 输出速度的滑动窗口秒数（`0` = 整个会话均值） |
 | `display.maxLines` | number | `0` | 状态栏最多显示行数（`0` = 不限） |
 | `colors.context` | string | `gradient` | 上下文进度条颜色；`gradient` = 真彩色平滑渐变 |
 | `colors.effort` | string | `auto` | effort 颜色；`auto` = 按级别取色（low 绿 / medium 黄 / high 亮品红 / xhigh 品红 / max 与 ultracode 动态循环） |

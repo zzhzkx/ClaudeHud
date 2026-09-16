@@ -181,7 +181,7 @@ export const DEFAULT_CONFIG: HudConfig = {
     showDuration: true,
     showEffort: true,
     showSpeed: true,
-    speedWindow: 120,
+    speedWindow: 30,
     showSessionTokens: true,
     timeFormat: 'relative',
     maxLines: 0,

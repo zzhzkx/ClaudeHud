@@ -27,7 +27,7 @@ async function main() {
             ? getUsageFromStdin(stdin)
             : null;
         const outputSpeed = config.display?.showSpeed === true
-            ? getOutputSpeed(stdin.transcript_path ?? '', config.display.speedWindow ?? 120)
+            ? getOutputSpeed(stdin.transcript_path ?? '', config.display.speedWindow ?? 30)
             : null;
         // 计算会话时长
         const sessionStart = transcript.sessionStart;
