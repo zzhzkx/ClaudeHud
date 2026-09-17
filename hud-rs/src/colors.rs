@@ -53,6 +53,27 @@ fn gradient_color(percent: f64) -> String {
     )
 }
 
+/// 上下文滑块进度条（标出 80% 自动压缩预警游标）
+pub fn context_slider_bar(percent_usable: f64, width: usize) -> String {
+    let clamped = percent_usable.clamp(0.0, 100.0);
+    let filled = ((clamped / 100.0) * width as f64).round() as usize;
+
+    let mut bar = String::new();
+    bar.push_str(&gradient_color(clamped));
+    for i in 0..width {
+        if i < filled {
+            bar.push('▓');
+        } else {
+            bar.push_str(DIM);
+            bar.push('░');
+            bar.push_str(RESET);
+            bar.push_str(&gradient_color(clamped));
+        }
+    }
+    bar.push_str(RESET);
+    bar
+}
+
 /// 上下文进度条
 pub fn context_bar(percent: f64, width: usize) -> String {
     let safe = percent.clamp(0.0, 100.0);

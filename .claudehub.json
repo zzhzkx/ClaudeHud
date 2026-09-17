@@ -21,6 +21,9 @@
     "showEffort": true,
     "showSpeed": true,
     "speedWindow": 30,
+    "showLatency": true,
+    "showCacheHitRate": true,
+    "showContextSlider": false,
     "showSessionTokens": true,
     "timeFormat": "relative",
     "maxLines": 0

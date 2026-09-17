@@ -53,6 +53,13 @@ fn main() {
     };
     let t_speed = t0.elapsed();
 
+    let last_latency = if cfg.show_latency {
+        transcript::last_turn_latency_sec(transcript_path)
+    } else {
+        None
+    };
+    let t_latency = t0.elapsed();
+
     let input = RenderInput {
         stdin: &payload,
         config: &cfg,
@@ -60,6 +67,7 @@ fn main() {
         model_name: &model,
         session_start_ms: session_start,
         output_speed,
+        last_latency_sec: last_latency,
     };
     let out = render::render(&input);
     let t_render = t0.elapsed();
@@ -71,7 +79,8 @@ fn main() {
         eprintln!("model_name   {:>6.1}ms", (t_model - t_git).as_secs_f64() * 1000.0);
         eprintln!("first_ts     {:>6.1}ms", (t_start - t_model).as_secs_f64() * 1000.0);
         eprintln!("speed        {:>6.1}ms", (t_speed - t_start).as_secs_f64() * 1000.0);
-        eprintln!("render       {:>6.1}ms", (t_render - t_speed).as_secs_f64() * 1000.0);
+        eprintln!("latency      {:>6.1}ms", (t_latency - t_speed).as_secs_f64() * 1000.0);
+        eprintln!("render       {:>6.1}ms", (t_render - t_latency).as_secs_f64() * 1000.0);
         eprintln!("TOTAL        {:>6.1}ms", t_render.as_secs_f64() * 1000.0);
     }
     print!("{}", out);

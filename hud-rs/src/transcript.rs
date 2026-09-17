@@ -127,6 +127,49 @@ pub fn first_timestamp_ms(path: &str) -> Option<i64> {
     None
 }
 
+/// 读取最近一轮模型的响应耗时（从触发请求到收到 assistant 响应的时间差）
+pub fn last_turn_latency_sec(path: &str) -> Option<f64> {
+    if path.is_empty() {
+        return None;
+    }
+    let lines = read_lines(path, 256 * 1024);
+    if lines.is_empty() {
+        return None;
+    }
+
+    let mut last_asst_ts: Option<i64> = None;
+
+    // 从后往前扫最近的一组 user -> assistant
+    for line in lines.iter().rev() {
+        let trimmed = line.trim();
+        if trimmed.is_empty() {
+            continue;
+        }
+        let entry = match json::parse(trimmed) {
+            Some(e) => e,
+            None => continue,
+        };
+
+        let entry_type = entry.get("type").and_then(|v| v.as_str()).unwrap_or("");
+        let ts = entry
+            .get("timestamp")
+            .and_then(|v| v.as_str())
+            .and_then(parse_timestamp_ms);
+
+        if entry_type == "assistant" && ts.is_some() && last_asst_ts.is_none() {
+            last_asst_ts = ts;
+        } else if entry_type == "user" && ts.is_some() && last_asst_ts.is_some() {
+            let u_ts = ts.unwrap();
+            let asst_ts = last_asst_ts.unwrap();
+            if asst_ts >= u_ts {
+                return Some((asst_ts - u_ts) as f64 / 1000.0);
+            }
+        }
+    }
+
+    None
+}
+
 /// 扫描 transcript，收集 assistant 的用量条目（按 message.id 去重）
 pub fn collect_usage_entries(lines: &[String]) -> Vec<UsageEntry> {
     let mut out: Vec<UsageEntry> = Vec::new();

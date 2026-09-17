@@ -14,6 +14,9 @@ pub struct Config {
     pub show_duration: bool,
     pub show_effort: bool,
     pub show_speed: bool,
+    pub show_latency: bool,
+    pub show_cache_hit_rate: bool,
+    pub show_context_slider: bool,
     pub show_session_tokens: bool,
     pub speed_window: u64,
     pub context_value: ContextValue,
@@ -38,6 +41,9 @@ impl Default for Config {
             show_duration: true,
             show_effort: true,
             show_speed: true,
+            show_latency: true,
+            show_cache_hit_rate: true,
+            show_context_slider: false,
             show_session_tokens: true,
             speed_window: 30,
             context_value: ContextValue::Both,
@@ -105,6 +111,15 @@ impl Config {
         }
         if let Some(v) = flag("showSpeed") {
             self.show_speed = v;
+        }
+        if let Some(v) = flag("showLatency") {
+            self.show_latency = v;
+        }
+        if let Some(v) = flag("showCacheHitRate") {
+            self.show_cache_hit_rate = v;
+        }
+        if let Some(v) = flag("showContextSlider") {
+            self.show_context_slider = v;
         }
         if let Some(v) = flag("showSessionTokens") {
             self.show_session_tokens = v;

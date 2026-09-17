@@ -74,19 +74,22 @@ cargo build --release
     "showEffort": true,
     "showSpeed": true,
     "speedWindow": 30,
+    "showLatency": true,
+    "showCacheHitRate": true,
+    "showContextSlider": false,
     "showSessionTokens": true,
     "maxLines": 0
   }
 }
 ```
 
-## 与 Node 版的差异
+## 功能特点
 
-Rust 版**只实现当前实际在用的功能**：
+Rust 版包含了当前实际在用的全套核心与增强特性：
 
 - 第 1 行：模型名 │ 路径 │ git 分支 │ 会话时长（精确到秒）
-- 第 2 行：上下文进度条 │ 使用率 │ effort │ 输出速度
-- 第 3 行：session token 用量
+- 第 2 行：上下文进度条（或可用滑块） │ 使用率 │ effort │ 输出速度（`🚀 t/s`） │ 响应延迟（`⚡RTT`）
+- 第 3 行：session token 用量（输入/输出/缓存写/缓存读） │ Prompt Cache 命中率（`🎯 命中率`）
 
 **未移植**（Node 版有，但实际输出为空、属于已知缺陷）：
 

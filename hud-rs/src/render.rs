@@ -18,6 +18,7 @@ pub struct RenderInput<'a> {
     pub model_name: &'a str,
     pub session_start_ms: Option<i64>,
     pub output_speed: Option<f64>,
+    pub last_latency_sec: Option<f64>,
 }
 
 const SEP: &str = " │ ";
@@ -92,33 +93,52 @@ fn context_line(input: &RenderInput) -> Option<String> {
 
     if cfg.show_context_bar {
         let percent = context_percent(input.stdin);
+        let cur_tok = current_tokens(input.stdin);
+        let size = context_window_size(input.stdin);
+
         let value = match cfg.context_value {
             ContextValue::Percent => format!("{:.0}%", percent),
             ContextValue::Remaining => format!("{:.0}%", 100.0 - percent),
             ContextValue::Tokens => {
-                let size = context_window_size(input.stdin);
                 format!(
                     "{}/{}",
-                    format_tokens(current_tokens(input.stdin)),
+                    format_tokens(cur_tok),
                     format_tokens(size)
                 )
             }
             ContextValue::Both => {
-                let size = context_window_size(input.stdin);
                 format!(
                     "{:.0}% ({}/{})",
                     percent,
-                    format_tokens(current_tokens(input.stdin)),
+                    format_tokens(cur_tok),
                     format_tokens(size)
                 )
             }
         };
-        parts.push(format!(
-            "{} {} {}",
-            dim("上下文"),
-            context_bar(percent, 10),
-            value
-        ));
+
+        if cfg.show_context_slider {
+            // 可用上下文计算：80% 触发自动压缩
+            let usable_tokens = (size as f64 * 0.8).floor() as u64;
+            let usable_pct = if usable_tokens > 0 {
+                (cur_tok as f64 / usable_tokens as f64 * 100.0).clamp(0.0, 100.0)
+            } else {
+                percent
+            };
+            parts.push(format!(
+                "{} {} {} {}",
+                dim("上下文"),
+                crate::colors::context_slider_bar(usable_pct, 10),
+                value,
+                dim(&format!("[可用{:.0}%]", usable_pct))
+            ));
+        } else {
+            parts.push(format!(
+                "{} {} {}",
+                dim("上下文"),
+                context_bar(percent, 10),
+                value
+            ));
+        }
     }
 
     if cfg.show_usage {
@@ -156,6 +176,21 @@ fn context_line(input: &RenderInput) -> Option<String> {
             _ => dim("— t/s"),
         };
         parts.push(format!("{} {}", dim("🚀"), text));
+    }
+
+    if cfg.show_latency {
+        let text = match input.last_latency_sec {
+            Some(sec) if sec > 0.0 => {
+                let formatted = if sec >= 60.0 {
+                    format!("{:.0}m{:.0}s", sec / 60.0, sec % 60.0)
+                } else {
+                    format!("{:.1}s", sec)
+                };
+                cyan(&formatted)
+            }
+            _ => dim("—s"),
+        };
+        parts.push(format!("{} {}", dim("⚡RTT"), text));
     }
 
     if parts.is_empty() {
@@ -202,6 +237,25 @@ fn tokens_line(input: &RenderInput) -> Option<String> {
     }
     if cache_read > 0 {
         parts.push(format!("📖 {} {}", dim("缓存读"), dim(&format_tokens(cache_read))));
+    }
+
+    if input.config.show_cache_hit_rate {
+        let cacheable = cache_read + cache_write;
+        if cacheable > 0 {
+            let hit_rate = (cache_read as f64 / cacheable as f64 * 100.0).clamp(0.0, 100.0);
+            let hit_color = if hit_rate >= 80.0 {
+                crate::fit::GREEN
+            } else if hit_rate >= 50.0 {
+                YELLOW
+            } else {
+                crate::fit::RED
+            };
+            parts.push(format!(
+                "🎯 {} {}",
+                dim("命中率"),
+                wrap(&format!("{:.0}%", hit_rate), hit_color)
+            ));
+        }
     }
 
     if parts.is_empty() {
