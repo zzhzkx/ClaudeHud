@@ -74,49 +74,22 @@ pub fn context_slider_bar(percent_usable: f64, width: usize) -> String {
     bar
 }
 
-/// 上下文高精度平滑渐变进度条（支持 1/8 字符亚像素平滑过渡）
+/// 上下文进度条
 pub fn context_bar(percent: f64, width: usize) -> String {
     let safe = percent.clamp(0.0, 100.0);
-    let val = (safe / 100.0) * width as f64;
-    let filled = val.floor() as usize;
-    let frac = val - filled as f64;
-    let frac_idx = (frac * 8.0).round() as usize;
-
-    let col = gradient_color(safe);
-    let mut bar = String::new();
-    bar.push_str(&col);
-
-    for _ in 0..filled {
-        bar.push('█');
-    }
-
-    if filled < width {
-        const FRACTIONS: [char; 8] = [' ', '▏', '▎', '▍', '▌', '▋', '▊', '▉'];
-        if frac_idx > 0 && frac_idx < 8 {
-            bar.push(FRACTIONS[frac_idx]);
-            bar.push_str(DIM);
-            for _ in 0..(width - filled - 1) {
-                bar.push('░');
-            }
-        } else if frac_idx == 8 {
-            bar.push('█');
-            bar.push_str(DIM);
-            for _ in 0..(width - filled - 1) {
-                bar.push('░');
-            }
-        } else {
-            bar.push_str(DIM);
-            for _ in 0..(width - filled) {
-                bar.push('░');
-            }
-        }
-    }
-
-    bar.push_str(RESET);
-    bar
+    let filled = ((safe / 100.0) * width as f64).round() as usize;
+    let empty = width.saturating_sub(filled);
+    format!(
+        "{}{}{}{}{}",
+        gradient_color(safe),
+        "█".repeat(filled),
+        DIM,
+        "░".repeat(empty),
+        RESET
+    )
 }
 
-/// 使用率进度条（同样支持 1/8 字符亚像素平滑过渡）
+/// 使用率进度条
 pub fn quota_bar(percent: f64, width: usize) -> String {
     let safe = percent.clamp(0.0, 100.0);
     let color = if safe >= 90.0 {
@@ -126,43 +99,16 @@ pub fn quota_bar(percent: f64, width: usize) -> String {
     } else {
         BRIGHT_BLUE
     };
-
-    let val = (safe / 100.0) * width as f64;
-    let filled = val.floor() as usize;
-    let frac = val - filled as f64;
-    let frac_idx = (frac * 8.0).round() as usize;
-
-    let mut bar = String::new();
-    bar.push_str(color);
-
-    for _ in 0..filled {
-        bar.push('█');
-    }
-
-    if filled < width {
-        const FRACTIONS: [char; 8] = [' ', '▏', '▎', '▍', '▌', '▋', '▊', '▉'];
-        if frac_idx > 0 && frac_idx < 8 {
-            bar.push(FRACTIONS[frac_idx]);
-            bar.push_str(DIM);
-            for _ in 0..(width - filled - 1) {
-                bar.push('░');
-            }
-        } else if frac_idx == 8 {
-            bar.push('█');
-            bar.push_str(DIM);
-            for _ in 0..(width - filled - 1) {
-                bar.push('░');
-            }
-        } else {
-            bar.push_str(DIM);
-            for _ in 0..(width - filled) {
-                bar.push('░');
-            }
-        }
-    }
-
-    bar.push_str(RESET);
-    bar
+    let filled = ((safe / 100.0) * width as f64).round() as usize;
+    let empty = width.saturating_sub(filled);
+    format!(
+        "{}{}{}{}{}",
+        color,
+        "█".repeat(filled),
+        DIM,
+        "░".repeat(empty),
+        RESET
+    )
 }
 
 /// effort 级别配色
