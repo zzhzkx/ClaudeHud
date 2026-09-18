@@ -15,7 +15,8 @@ try {
 // Use object format (official Claude Code format)
 config.statusLine = {
   type: 'command',
-  command: 'node F:/claude_project/ClaudeHud/dist/index.js',
+  command: 'F:/claude_project/ClaudeHud/hud-rs/target/release/claudehub.exe',
+  refreshInterval: 1,
 };
 
 writeFileSync(settingsPath, JSON.stringify(config, null, 2) + '\n', 'utf-8');
